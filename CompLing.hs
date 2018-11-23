@@ -46,7 +46,12 @@ insert elem (x:xs)
   | otherwise = x:(insert elem xs)
 
 adjacentPairs :: Document -> Pairs
-adjacentPairs = undefined  -- remove "undefined" and write your function here
+--adjacentPairs = undefined  -- remove "undefined" and write your function here
+adjacentPairs doc = adjacentPairsAux (docToSentence doc)
+
+adjacentPairsAux :: Sentence -> Pairs
+adjacentPairsAux [x] = []
+adjacentPairsAux (x1:x2:xs) = (x1,x2) : (adjacentPairsAux (x2:xs))
 
 initialPairs :: Document -> Pairs
 initialPairs = undefined  -- remove "undefined" and write your function here
