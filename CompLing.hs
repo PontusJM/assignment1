@@ -19,8 +19,16 @@ document = [sentence1, sentence2]
 -- DO NOT CHANGE THE TYPE SIGNATURES FOR THESE FUNCTIONS
 
 wordCount :: Document -> WordTally
-wordCount = undefined  -- remove "undefined" and write your function here
+--wordCount = undefined  -- remove "undefined" and write your function here
+wordCount doc = wordCountAux (insertionSort (docToSentence doc)) 1
 
+wordCountAux :: Sentence -> Int -> WordTally
+wordCountAux [] _ = []
+wordCountAux [x] n = [(x,n)]
+wordCountAux (x:xs) n 
+  | x == head xs  = wordCountAux xs (n+1)
+  | otherwise = (x,n) : (wordCountAux xs 1)
+  
 docToSentence :: Document -> Sentence
 docToSentence [] = []
 docToSentence (x:xs) = x ++ docToSentence(xs)
