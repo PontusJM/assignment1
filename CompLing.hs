@@ -15,6 +15,8 @@ type PairsTally = [((String, String), Int)]
 sentence1 = ["Today", "was", "a", "good", "good", "day"]
 sentence2 = ["Yesterday", "was","a", "really", "good","day"]
 document = [sentence1, sentence2]
+pcount = pairsCount (adjacentPairs document)
+ns = neighbours pcount "a"
 
 -- DO NOT CHANGE THE TYPE SIGNATURES FOR THESE FUNCTIONS
 
@@ -70,18 +72,28 @@ pairsCount :: Pairs -> PairsTally
 pairsCount pairs = getTally (insertionSort pairs) 1
 
 neighbours :: PairsTally -> String -> WordTally
---neighbours = undefined  -- remove "undefined" and write your function here
 neighbours [] _ = []
 neighbours (x:xs) word 
   | fst (fst x) == word = (snd (fst x),snd x) : (neighbours xs word)
   | snd (fst x) == word = (fst (fst x),snd x) : (neighbours xs word)
   | otherwise = neighbours xs word
 
-
 mostCommonNeighbour :: PairsTally -> String -> Maybe String
-mostCommonNeighbour = undefined  -- remove "undefined" and write your function here
+mostCommonNeighbour pairs word 
+  | pairs `contains` word = Just (mostCommonNeighbourAux (neighbours pairs word))
+  | otherwise = Nothing
 
+mostCommonNeighbourAux :: WordTally -> String
+mostCommonNeighbourAux [x] = fst x
+mostCommonNeighbourAux (x1:x2:xs) 
+  | snd x1 > snd x2 = mostCommonNeighbourAux (x1:xs)
+  | otherwise = mostCommonNeighbourAux (x2:xs)
 
+contains :: PairsTally -> String -> Bool
+contains [] _ = False
+contains (x:xs) word 
+  | fst (fst x) == word || snd (fst x)  == word = True
+  | otherwise = contains xs word
 
 -- Test Cases
 -- feel free to add other test cases here. an independent set of
