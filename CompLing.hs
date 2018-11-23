@@ -69,10 +69,14 @@ finalPairsAux (_:xs) = finalPairsAux xs
 pairsCount :: Pairs -> PairsTally
 pairsCount pairs = getTally (insertionSort pairs) 1
 
-
-
 neighbours :: PairsTally -> String -> WordTally
-neighbours = undefined  -- remove "undefined" and write your function here
+--neighbours = undefined  -- remove "undefined" and write your function here
+neighbours [] _ = []
+neighbours (x:xs) word 
+  | fst (fst x) == word = (snd (fst x),snd x) : (neighbours xs word)
+  | snd (fst x) == word = (fst (fst x),snd x) : (neighbours xs word)
+  | otherwise = neighbours xs word
+
 
 mostCommonNeighbour :: PairsTally -> String -> Maybe String
 mostCommonNeighbour = undefined  -- remove "undefined" and write your function here
