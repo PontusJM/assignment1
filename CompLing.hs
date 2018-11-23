@@ -19,15 +19,14 @@ document = [sentence1, sentence2]
 -- DO NOT CHANGE THE TYPE SIGNATURES FOR THESE FUNCTIONS
 
 wordCount :: Document -> WordTally
---wordCount = undefined  -- remove "undefined" and write your function here
-wordCount doc = wordCountAux (insertionSort (docToSentence doc)) 1
+wordCount doc = getTally (insertionSort (docToSentence doc)) 1
 
-wordCountAux :: Sentence -> Int -> WordTally
-wordCountAux [] _ = []
-wordCountAux [x] n = [(x,n)]
-wordCountAux (x:xs) n 
-  | x == head xs  = wordCountAux xs (n+1)
-  | otherwise = (x,n) : (wordCountAux xs 1)
+getTally :: Eq a => [a] -> Int -> [(a,Int)]
+getTally [] _ = []
+getTally [x] n = [(x,n)]
+getTally (x:xs) n 
+  | x == head xs = getTally xs (n+1)
+  | otherwise = (x,n) : (getTally xs 1)
   
 docToSentence :: Document -> Sentence
 docToSentence [] = []
@@ -35,18 +34,17 @@ docToSentence (x:xs) = x ++ docToSentence(xs)
 
 insertionSort xs = insertionSortAux [] xs
 
-insertionSortAux :: [String] -> [String] -> [String]
+insertionSortAux :: Ord a => [a] -> [a] -> [a]
 insertionSortAux sorted [] = sorted
 insertionSortAux sorted (x:xs) = insertionSortAux (insert x sorted) xs
 
-insert :: String -> [String] -> [String]
+insert :: Ord a => a -> [a] -> [a]
 insert elem [] = [elem]
 insert elem (x:xs) 
   | elem < x = elem:x:xs
   | otherwise = x:(insert elem xs)
 
 adjacentPairs :: Document -> Pairs
---adjacentPairs = undefined  -- remove "undefined" and write your function here
 adjacentPairs doc = adjacentPairsAux (docToSentence doc)
 
 adjacentPairsAux :: Sentence -> Pairs
@@ -54,13 +52,23 @@ adjacentPairsAux [x] = []
 adjacentPairsAux (x1:x2:xs) = (x1,x2) : (adjacentPairsAux (x2:xs))
 
 initialPairs :: Document -> Pairs
-initialPairs = undefined  -- remove "undefined" and write your function here
+initialPairs [] = []
+initialPairs (x:xs) = initialPairsAux x : (initialPairs (xs))
+
+initialPairsAux :: Sentence -> (String,String)
+initialPairsAux (x1:x2:xs) = (x1,x2)
 
 finalPairs :: Document -> Pairs
-finalPairs = undefined  -- remove "undefined" and write your function here
+finalPairs [] = []
+finalPairs (x:xs) = finalPairsAux x : (finalPairs(xs))
+
+finalPairsAux :: Sentence -> (String,String)
+finalPairsAux [x1,x2] = (x1,x2)
+finalPairsAux (_:xs) = finalPairsAux xs
 
 pairsCount :: Pairs -> PairsTally
-pairsCount = undefined  -- remove "undefined" and write your function here
+pairsCount pairs = getTally (insertionSort pairs) 1
+
 
 
 neighbours :: PairsTally -> String -> WordTally
