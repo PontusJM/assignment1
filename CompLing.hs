@@ -11,31 +11,36 @@ type WordTally = [(String, Int)]
 type Pairs = [(String, String)]
 type PairsTally = [((String, String), Int)]
 
--- Definitions for testing purposes below
-sentence1 = ["Today", "was", "a", "good", "good", "day"]
-sentence2 = ["Yesterday", "was","a", "really", "good","day"]
-document = [sentence1, sentence2]
-pcount = pairsCount (adjacentPairs document)
-ns = neighbours pcount "a"
-
 -- DO NOT CHANGE THE TYPE SIGNATURES FOR THESE FUNCTIONS
 
+--Counts the amount of times a word occurs in a given document
+--PRECONDITIONS Case sensitive; Lower case and upper case will be treated differently
+--RETURNS a list where the tuples containing a string and an integer represent the word and the number of times a word occurs in the document
+--Side effects: None
+--Example: wordCount [["Hello", "world"], [Bye", "world"]] -> [("Hello",1), ("world",2), ("Bye", 1)
 wordCount :: Document -> WordTally
 wordCount doc = getTally (insertionSort (docToSentence doc)) 1
 
+--Counts the amount of times an element occurs in a list
+--PRECONDITIONS Same equivalence type of the arguements
+--RETURNS a list containing each element in the list together with the amount of times it occurs in the list as a tuple
+--SIDE EFFECTS none
+--EXAMPLE getTally [True, False, True, False, False] -> [(True, 2),(False, 3]
+--VARIANT: length (x:xs)
 getTally :: Eq a => [a] -> Int -> [(a,Int)]
 getTally [] _ = []
 getTally [x] n = [(x,n)]
 getTally (x:xs) n 
   | x == head xs = getTally xs (n+1)
   | otherwise = (x,n) : (getTally xs 1)
-  
+
+--Converts the entire document into one sentence (list of strings)
 docToSentence :: Document -> Sentence
 docToSentence [] = []
 docToSentence (x:xs) = x ++ docToSentence(xs)
 
+--Trivial
 insertionSort xs = insertionSortAux [] xs
-
 insertionSortAux :: Ord a => [a] -> [a] -> [a]
 insertionSortAux sorted [] = sorted
 insertionSortAux sorted (x:xs) = insertionSortAux (insert x sorted) xs
@@ -46,31 +51,74 @@ insert elem (x:xs)
   | elem < x = elem:x:xs
   | otherwise = x:(insert elem xs)
 
+--Results in all the adjacent pairs in the document
+--PRECONDITIONS Needs to be at least two words in the document for a pair to be returned
+--RETURNS: Tuples of strings containing the adjacent words in the document
+--SIDE EFFECTS: none
+--EXAMPLE adjacentPairs [["Hello", "world"], ["Bye","bye", "world"], ["Word"]] -> [("Hello", "world"), [("Bye","bye"), ("bye", "world")]
 adjacentPairs :: Document -> Pairs
-adjacentPairs doc = adjacentPairsAux (docToSentence doc)
+adjacentPairs doc = concat (map adjacentPairsAux doc)
 
+--VARIANT: length x2:xs
 adjacentPairsAux :: Sentence -> Pairs
 adjacentPairsAux [x] = []
 adjacentPairsAux (x1:x2:xs) = (x1,x2) : (adjacentPairsAux (x2:xs))
 
+--Writes out the first two words in a sentence
+--PRECONDITIONS must be sentences consisting of words of 2 or more to create a pair
+--RETURNS: a list of tuples containing the first two elements in each sentence from the document
+--SIDE EFFECTS: none
+--EXAMPLE: initialPairs [["Cheerio", "ole", "chap!"]] -> [("Cheerio", "ole")]
+--VARIANT: length xs
 initialPairs :: Document -> Pairs
 initialPairs [] = []
-initialPairs (x:xs) = initialPairsAux x : (initialPairs (xs))
+initialPairs (x:xs) 
+  | length x < 2 = []
+  | otherwise = initialPairsAux x : (initialPairs (xs))
 
 initialPairsAux :: Sentence -> (String,String)
 initialPairsAux (x1:x2:xs) = (x1,x2)
 
+--Writes out the last two words in a sentence
+--PRECONDITIONS must be sentences consisting of words of 2 or more to create a pair
+--RETURNS: a list of tuples containing the last two elements in each sentence from the document
+--SIDE EFFECTS: none
+--EXAMPLE: finalPairs [["Cheerio", "ole", "chap!"]] -> [("ole","chap!")]
+--VARIANT: length xs
 finalPairs :: Document -> Pairs
 finalPairs [] = []
-finalPairs (x:xs) = finalPairsAux x : (finalPairs(xs))
+finalPairs (x:xs) 
+  | length x < 2 = []
+  | otherwise = finalPairsAux x : (finalPairs(xs))
+
 
 finalPairsAux :: Sentence -> (String,String)
 finalPairsAux [x1,x2] = (x1,x2)
 finalPairsAux (_:xs) = finalPairsAux xs
 
+--Results in a tally of the pairs occuring in the list of pairs
+--PRECONDITIONS: Case sensitive when comparing words
+--RETURNS:  pair of tuples in another tuple together with the amount of times it occurs in the form of an integer and all of this in a list of course
+--SIDE EFFECTS: none
+--EXAMPLE: pairsCount [("big","bear"),("bear","big"),("big","dog")] -> [(("bear","big"),2), (("big","dog"),1)]
 pairsCount :: Pairs -> PairsTally
-pairsCount pairs = getTally (insertionSort pairs) 1
+pairsCount pairs = getTally (insertionSort (map pairSort pairs)) 1
 
+--Sorts a given pair of ordered elements
+--PRECONDITION: Ordered elements of equal type
+--RETURNS: A sorted pair
+--EXAMPLE: pairSort (2,0) -> (0,2)
+pairSort :: Ord a => (a,a) -> (a,a)
+pairSort (x,y) 
+  | x < y = (x,y)
+  | otherwise = (y,x)
+
+--Computes the times a given word's neighbour occurs within pairsTally
+--PRECONDITION Case sensitive.
+--SIDE EFFECTS: None
+--RETURNS A list containing all neighbours to a given word and the number of occurences as a tuple
+--EXAMPLE: neighbours [(("bear","big"),2),(("big","dog"),1)] "big" -> [("bear",2),("dog",1)]
+--VARIANT: length xs
 neighbours :: PairsTally -> String -> WordTally
 neighbours [] _ = []
 neighbours (x:xs) word 
@@ -78,17 +126,34 @@ neighbours (x:xs) word
   | snd (fst x) == word = (fst (fst x),snd x) : (neighbours xs word)
   | otherwise = neighbours xs word
 
+--Results in the the word that occurs the most as a neighbour to given word
+--PRECONDITIONS: Case sensitive.
+--RETURNS Just: a string of given word's most common neighbour in pairsTally
+--        Nothing: nothing returns. When pairsTally doesn't contain the given word.
+--SIDE EFFECTS: none
+--EXAMPLE: mostCommonNeighbour  [(("bear","big"),2),(("big","dog"),1)] "big" -> Just "bear"
+--EXAMPLE: mostCommonNeighbour  [(("bear","big"),2),(("big","dog"),1)] "bug" -> Nothing
 mostCommonNeighbour :: PairsTally -> String -> Maybe String
 mostCommonNeighbour pairs word 
   | pairs `contains` word = Just (mostCommonNeighbourAux (neighbours pairs word))
   | otherwise = Nothing
 
+--Computes the word with the maximum occurence in a word tally
+--PRECONDITIONS: none
+--RETURNS: The word with the highest tally
+--EXAMPLE: mostCommonNeighbourAux [("hej",2),("då",3)] -> "då"
+--VARIANT: length xs
 mostCommonNeighbourAux :: WordTally -> String
 mostCommonNeighbourAux [x] = fst x
 mostCommonNeighbourAux (x1:x2:xs) 
   | snd x1 > snd x2 = mostCommonNeighbourAux (x1:xs)
   | otherwise = mostCommonNeighbourAux (x2:xs)
 
+--Checks if a word is contained within a pairsTally
+--RETURNS: True if the word is found
+--         False otherwise
+--EXAMPLE: contains [("hej","då",3),("koko","jojo",2)] "koko" -> True
+--VARIANT: length xs
 contains :: PairsTally -> String -> Bool
 contains [] _ = False
 contains (x:xs) word 
