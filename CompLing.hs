@@ -37,6 +37,7 @@ getTally (x:xs) n
   | otherwise = (x,n) : (getTally xs 1)
 
 --Trivial, commonly used sorting algorithm
+insertionSort :: Ord a => [a] -> [a]
 insertionSort xs = insertionSortAux [] xs
   where
     insertionSortAux :: Ord a => [a] -> [a] -> [a]
