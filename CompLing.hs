@@ -20,11 +20,11 @@ type PairsTally = [((String, String), Int)]
 --Side effects: None
 --Example: wordCount [["Hello", "world"], [Bye", "world"]] -> [("Hello",1), ("world",2), ("Bye", 1)]
 wordCount :: Document -> WordTally
-wordCount doc = getTally (insertionSort (docToSentence doc)) 1
+wordCount doc = getTally (insertionSort (concat doc)) 1
 
 --getTally
 --Counts the amount of times an element occurs in a list
---PRECONDITIONS Same equivalence type of the arguements
+--PRECONDITIONS Requires a sorted list of elements whose type is ordered and equivalent.
 --RETURNS a list containing each element in the list together with the amount of times it occurs in the list as a tuple
 --SIDE EFFECTS none
 --EXAMPLE getTally [True, False, True, False, False] -> [(True, 2),(False, 3)]
@@ -35,11 +35,6 @@ getTally [x] n = [(x,n)]
 getTally (x:xs) n 
   | x == head xs = getTally xs (n+1)
   | otherwise = (x,n) : (getTally xs 1)
-
---Converts the entire document into one sentence (list of strings)
-docToSentence :: Document -> Sentence
-docToSentence [] = []
-docToSentence (x:xs) = x ++ docToSentence(xs)
 
 --Trivial, commonly used sorting algorithm
 insertionSort xs = insertionSortAux [] xs
