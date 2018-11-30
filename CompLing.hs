@@ -154,7 +154,7 @@ mostCommonNeighbour pairs word
         --EXAMPLE: mostCommonNeighbourAux [("hej",2),("då",3)] -> "då"
         --VARIANT: length xs
         mostCommonNeighbourAux :: WordTally -> String
-        mostCommonNeighbourAux [x] = fst x
+        mostCommonNeighbourAux [(x1,x2)] = x1
         mostCommonNeighbourAux (x@(x1,x2):y@(y1,y2):zs) 
           | x2 > y2 = mostCommonNeighbourAux (x:zs)
           | otherwise = mostCommonNeighbourAux (y:zs)
